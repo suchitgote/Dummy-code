@@ -52,3 +52,169 @@ export const apiRequest = async (method, url, data = {}, params = {}) => {
 };
 
 export default apiClient;
+
+//// use this generic function 
+import { apiRequest } from './apiClient';
+
+export const GET_TEMPLATE_DATA_URL = '/getTemplatesData';
+
+export default {
+  fetchTemplatesData: async ({ 
+    regions = ['SINGAPORE'], 
+    workTypes, 
+    actions, 
+    channels = ['MESSAGE'], 
+    startPage = [0], 
+    endPage = [100] 
+  }) => {
+    return apiRequest('post', GET_TEMPLATE_DATA_URL, {
+      regions, workTypes, actions, channels, startPage, endPage
+    });
+  },
+};
+
+
+//// use this in components 
+import apiServices from './apiServices';
+
+const fetchData = async () => {
+  try {
+    const data = await apiServices.fetchTemplatesData({ workTypes: [], actions: [] });
+    console.log('API Data:', data);
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
+  }
+};
+
+fetchData();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////apiClient.js
+
+import axios from 'axios';
+export const BASE_URL = 'http://localhost:8080/api';
+
+const apiClient = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Generic API request function for Redux Thunks
+export const apiRequest = async ({ method, url, data = {}, params = {} }) => {
+  try {
+    const response = await apiClient({
+      method,
+      url,
+      data,
+      params,
+    });
+    return response.data; // Return only the data
+  } catch (error) {
+    console.error(`API Error (${method.toUpperCase()} ${url}):`, error);
+    throw error.response?.data || error.message; // Return meaningful error message
+  }
+};
+
+export default apiClient;
+
+
+
+/////apiThunk.js
+
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { apiRequest } from './apiClient';
+
+// Generic API Thunk
+export const createApiThunk = (type, method, url) => {
+  return createAsyncThunk(type, async (payload, { rejectWithValue }) => {
+    try {
+      const response = await apiRequest({ method, url, data: payload });
+      return response; // Success
+    } catch (error) {
+      return rejectWithValue(error); // Handle error properly
+    }
+  });
+};
+
+
+//// templateSlice.js
+
+import { createSlice } from '@reduxjs/toolkit';
+import { createApiThunk } from './apiThunks';
+
+// Define API endpoint and method
+export const fetchTemplatesData = createApiThunk(
+  'templates/fetchTemplatesData',
+  'post',
+  '/getTemplatesData'
+);
+
+const templateSlice = createSlice({
+  name: 'templates',
+  initialState: {
+    data: [],
+    loading: false,
+    error: null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTemplatesData.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTemplatesData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload;
+      })
+      .addCase(fetchTemplatesData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
+
+export default templateSlice.reducer;
+
+
+///// templateComponent.js
+
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTemplatesData } from '../redux/templateSlice';
+
+const TemplateComponent = () => {
+  const dispatch = useDispatch();
+  const { data, loading, error } = useSelector((state) => state.templates);
+
+  useEffect(() => {
+    dispatch(fetchTemplatesData({ regions: ['SINGAPORE'], workTypes: [], actions: [] }));
+  }, [dispatch]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div>
+      <h2>Template Data</h2>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
+};
+
+export default TemplateComponent;
