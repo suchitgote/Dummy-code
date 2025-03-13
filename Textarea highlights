@@ -47,3 +47,80 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useRef } from "react";
+import HighlightWithinTextarea from "react-highlight-within-textarea";
+
+function App() {
+  const [text, setText] = useState("This is a sample text.");
+  const hiddenTextareaRef = useRef(null);
+  const selectionRef = useRef(0);
+
+  const handleMouseDown = (event) => {
+    if (event.button !== 0) return; // Ensure left mouse button
+
+    // Focus on the hidden textarea to track cursor position
+    if (hiddenTextareaRef.current) {
+      hiddenTextareaRef.current.focus();
+      setTimeout(() => {
+        selectionRef.current = hiddenTextareaRef.current.selectionStart;
+      }, 0);
+    }
+  };
+
+  const handleClick = () => {
+    const cursorPosition = selectionRef.current;
+    const newText = " [INSERTED] ";
+
+    // Insert new text at the stored cursor position
+    const updatedText =
+      text.slice(0, cursorPosition) + newText + text.slice(cursorPosition);
+
+    setText(updatedText);
+  };
+
+  return (
+    <div
+      onMouseDown={handleMouseDown} // Capture cursor position
+      onClick={handleClick} // Insert text at cursor position
+      style={{ display: "inline-block", cursor: "text", position: "relative" }}
+    >
+      <HighlightWithinTextarea
+        value={text}
+        onChange={(value) => setText(value)}
+        highlight={/sample/g} // Example: Highlighting "sample"
+      />
+      {/* Hidden Textarea to track cursor position */}
+      <textarea
+        ref={hiddenTextareaRef}
+        value={text}
+        onChange={() => {}} // No update needed
+        style={{
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+          height: 0,
+          width: 0,
+        }}
+      />
+    </div>
+  );
+}
+
+export default App;
