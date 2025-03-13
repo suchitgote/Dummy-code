@@ -124,3 +124,60 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useRef } from "react";
+import HighlightWithinTextarea from "react-highlight-within-textarea";
+
+function App() {
+  const [text, setText] = useState("This is a sample text.");
+  const textareaRef = useRef(null);
+  const selectionRef = useRef(0);
+
+  const getCursorPosition = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(textareaRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+
+    const cursorPosition = preCaretRange.toString().length;
+    selectionRef.current = cursorPosition;
+    console.log("Cursor Position:", cursorPosition);
+  };
+
+  return (
+    <div
+      onMouseUp={getCursorPosition} // Detect cursor position on mouse click
+      onKeyUp={getCursorPosition} // Detect cursor position on keyboard movement
+      style={{ position: "relative" }}
+    >
+      <HighlightWithinTextarea
+        ref={textareaRef}
+        value={text}
+        onChange={(value) => setText(value)}
+        highlight={/sample/g}
+      />
+    </div>
+  );
+}
+
+export default App;
+
+
