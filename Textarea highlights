@@ -181,3 +181,49 @@ function App() {
 export default App;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState } from "react";
+
+const EditableDivWithCursor = () => {
+  const [cursorPosition, setCursorPosition] = useState(0);
+
+  const handleCursorChange = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(range.commonAncestorContainer);
+      preCaretRange.setEnd(range.startContainer, range.startOffset);
+      setCursorPosition(preCaretRange.toString().length);
+    }
+  };
+
+  return (
+    <div>
+      <div
+        contentEditable
+        onKeyUp={handleCursorChange}
+        onMouseUp={handleCursorChange}
+        style={{ border: "1px solid black", padding: "5px", minHeight: "50px" }}
+      >
+        Editable Content
+      </div>
+      <p>Cursor Position: {cursorPosition}</p>
+    </div>
+  );
+};
+
+export default EditableDivWithCursor;
+
+
