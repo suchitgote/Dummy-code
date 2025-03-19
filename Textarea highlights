@@ -254,6 +254,26 @@ const substring = "suchit";
 
 
 
+
 console.log(findSubstringIndices(message, substring));
 
+
+
+
+
+
+
+function findSubstringIndices(message, substring) {
+    // Escape special characters in the substring
+    const escapedSubstring = substring.replace(/[-[{}()*+?.,\\^$|#\s]/g, '\\$&');
+    const regex = new RegExp(escapedSubstring, 'g'); // Global regex to match all occurrences
+    let matches = [...message.matchAll(regex)];
+    let indices = matches.map(match => [match.index, match.index + substring.length - 1]);
+    return indices;
+}
+
+const message = "my name is [suchit] , and my school is also [suchit]";
+const substring = "[suchit]";
+
+console.log(findSubstringIndices(message, substring));
 
