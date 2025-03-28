@@ -277,3 +277,32 @@ const substring = "[suchit]";
 
 console.log(findSubstringIndices(message, substring));
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let arr1 = [[1, 5], [8, 10], [15, 20], [33, 45]];
+let arr2 = [[1, 7], [11, 23]];
+
+// Helper function to check if two ranges overlap
+function isOverlapping(a, b) {
+  return a[0] <= b[1] && b[0] <= a[1];
+}
+
+// Filter arr1 based on whether it overlaps with any range in arr2
+let filteredArr1 = arr1.filter(a1 => {
+  return !arr2.some(a2 => isOverlapping(a1, a2));
+});
+
+console.log("Filtered arr1:", filteredArr1);
