@@ -1,0 +1,45 @@
+import React, { useRef, useEffect, useState } from "react";
+import HighlightWithinTextarea from "react-highlight-within-textarea";
+
+export default function App() {
+  const wrapperRef = useRef(null);
+  const [range, setRange] = useState({ start: 0, end: 0 });
+
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+
+    // get actual textarea inside the component
+    const textarea = wrapperRef.current.querySelector("textarea");
+    if (!textarea) return;
+
+    const handleSelect = () => {
+      setRange({
+        start: textarea.selectionStart,
+        end: textarea.selectionEnd,
+      });
+    };
+
+    textarea.addEventListener("select", handleSelect);
+    textarea.addEventListener("mouseup", handleSelect);
+    textarea.addEventListener("keyup", handleSelect);
+
+    return () => {
+      textarea.removeEventListener("select", handleSelect);
+      textarea.removeEventListener("mouseup", handleSelect);
+      textarea.removeEventListener("keyup", handleSelect);
+    };
+  }, []);
+
+  return (
+    <div>
+      <HighlightWithinTextarea
+        value="Select something here…"
+        readOnly={true}
+        innerRef={wrapperRef}
+      />
+
+      <p>Start: {range.start}</p>
+      <p>End: {range.end}</p>
+    </div>
+  );
+}
