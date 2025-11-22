@@ -1,0 +1,28 @@
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+export const api = createApi({
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  endpoints: (builder) => ({
+    getUsers: builder.query({
+      query: () => "/users",
+    }),
+    getOrders: builder.query({
+      query: () => "/orders",
+    }),
+  }),
+});
+
+export const { useGetUsersQuery, useGetOrdersQuery } = api;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+const { data: users, isLoading: usersLoading } = useGetUsersQuery();
+const { data: orders, isLoading: ordersLoading } = useGetOrdersQuery();
+
+return (
+  <>
+    {usersLoading ? <Spinner /> : <UsersList users={users} />}
+    {ordersLoading ? <Spinner /> : <OrdersList orders={orders} />}
+  </>
+);
